@@ -26,6 +26,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // MOBILE NAVIGATION TOGGLE
   // ============================================
   const mobileToggle = document.getElementById('mobileToggle');
+  const mobileClose = document.getElementById('mobileClose');
   const navLinks = document.getElementById('navLinks');
 
   mobileToggle.addEventListener('click', () => {
@@ -34,6 +35,15 @@ document.addEventListener('DOMContentLoaded', () => {
     header.classList.toggle('menu-open');
     document.body.style.overflow = navLinks.classList.contains('active') ? 'hidden' : '';
   });
+
+  if (mobileClose) {
+    mobileClose.addEventListener('click', () => {
+      mobileToggle.classList.remove('active');
+      navLinks.classList.remove('active');
+      header.classList.remove('menu-open');
+      document.body.style.overflow = '';
+    });
+  }
 
   // Close mobile nav when a link is clicked
   navLinks.querySelectorAll('a').forEach(link => {
