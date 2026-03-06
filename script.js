@@ -31,6 +31,7 @@ document.addEventListener('DOMContentLoaded', () => {
   mobileToggle.addEventListener('click', () => {
     mobileToggle.classList.toggle('active');
     navLinks.classList.toggle('active');
+    header.classList.toggle('menu-open');
     document.body.style.overflow = navLinks.classList.contains('active') ? 'hidden' : '';
   });
 
@@ -39,6 +40,7 @@ document.addEventListener('DOMContentLoaded', () => {
     link.addEventListener('click', () => {
       mobileToggle.classList.remove('active');
       navLinks.classList.remove('active');
+      header.classList.remove('menu-open');
       document.body.style.overflow = '';
     });
   });
@@ -207,24 +209,44 @@ document.addEventListener('DOMContentLoaded', () => {
     const formData = new FormData(enquiryForm);
     const data = Object.fromEntries(formData);
 
+    // FormSubmit limitation check
+    if (window.location.protocol === 'file:') {
+      showFormMessage('Note: The email feature requires a web server (like Live Server or Vercel). It does not work on local file:// paths.', 'error');
+      return;
+    }
+
     // Validation
     if (!data.parentName || !data.parentPhone || !data.childName || !data.childAge || !data.program) {
       showFormMessage('Please fill in all required fields.', 'error');
       return;
     }
 
-    // Simulated submission
+    // Network request to Formsubmit via AJAX
     const submitBtn = enquiryForm.querySelector('button[type="submit"]');
     const originalText = submitBtn.textContent;
     submitBtn.textContent = 'Sending...';
     submitBtn.disabled = true;
 
-    setTimeout(() => {
-      showFormMessage('Thank you for your enquiry! Our admissions team will contact you shortly.', 'success');
-      enquiryForm.reset();
-      submitBtn.textContent = originalText;
-      submitBtn.disabled = false;
-    }, 1500);
+    fetch('https://formsubmit.co/ajax/c0e2576bfda2f1e48e09bd5f73635b5a', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify(data)
+    })
+      .then(response => response.json())
+      .then(result => {
+        showFormMessage('Thank you for your enquiry! Our admissions team will contact you shortly.', 'success');
+        enquiryForm.reset();
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
+      })
+      .catch(error => {
+        showFormMessage('Oops! Something went wrong. Please try again.', 'error');
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
+      });
   });
 
   function showFormMessage(message, type) {
